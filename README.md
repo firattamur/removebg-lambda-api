@@ -24,7 +24,7 @@ This repository contains the code for the FastAPI backend of the Image Backgroun
 
 ## 🏗️ Architecture
 
-![Architecture]()
+![Architecture](https://github.com/firattamur/removebg-lambda-api/blob/main/.github/assets/architecture.png)
 
 ## 🚀 Getting Started
 
