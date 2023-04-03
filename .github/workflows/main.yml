@@ -1,0 +1,163 @@
+name: Build and Deploy
+
+on:
+  push:
+    tags:
+      - "v*"
+
+
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+          architecture  : x64
+
+      - name: Install virtualenv
+        run: pip3 install virtualenv
+
+      - name: Create virtual environment
+        run: python -m venv env && . ./env/bin/activate
+
+      - name: Install dependencies
+        run: |
+          python3 -m pip install --upgrade pip
+          pip3 install -r requirements.txt
+
+      - name: Zip python packages
+        run: |
+          cd /opt/hostedtoolcache/Python/3.9.16/x64/lib/python3.9/site-packages
+          zip -r9 ${GITHUB_WORKSPACE}/lambda.zip .
+
+      - name: Add project files
+        run: |
+          cd $GITHUB_WORKSPACE/app
+          zip -g ${GITHUB_WORKSPACE}/lambda.zip -r .
+
+      - name: Upload zip to artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: lambda
+          path: lambda.zip
+
+  upload:
+    needs: [build]
+    runs-on: ubuntu-latest
+    
+    environment:
+      name: production
+
+    steps:
+      - name: Install AWS CLI
+        uses: unfor19/install-aws-cli-action@v1
+        with:
+          version: 1
+
+        env:
+          AWS_ACCESS_KEY_ID     : ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_DEFAULT_REGION    : ${{ secrets.AWS_DEFAULT_REGION }}
+          AWS_SECRET_ACCESS_KEY : ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      - name: Download artifact from build
+        uses: actions/download-artifact@v2
+        with:
+          name: lambda
+
+      - name: Deploy to AWS Lambda
+        run : aws s3 cp lambda.zip s3://${{ secrets.AWS_S3_BUCKET }}/${{ vars.STAGE }}/${{  github.ref_name }}/lambda.zip
+        env :
+          AWS_ACCESS_KEY_ID     : ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_DEFAULT_REGION    : ${{ secrets.AWS_DEFAULT_REGION }}
+          AWS_SECRET_ACCESS_KEY : ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+  deploy:
+    needs: [upload]
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: terraform/
+
+    environment:
+      name: production
+
+    env:
+      AWS_ACCESS_KEY_ID                 : ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_DEFAULT_REGION                : ${{ secrets.AWS_DEFAULT_REGION }}
+      AWS_SECRET_ACCESS_KEY             : ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      TF_VAR_APP_VERSION                : ${{  github.ref_name }}
+      TF_VAR_APP_AWS_S3_BUCKET          : ${{ secrets.TF_VAR_APP_AWS_S3_BUCKET }}
+      TF_VAR_APP_AWS_DEFAULT_REGION     : ${{ secrets.TF_VAR_APP_AWS_DEFAULT_REGION }}
+      TF_VAR_APP_AWS_ACCESS_KEY_ID      : ${{ secrets.TF_VAR_APP_AWS_ACCESS_KEY_ID }}
+      TF_VAR_APP_AWS_SECRET_ACCESS_KEY  : ${{ secrets.TF_VAR_APP_AWS_SECRET_ACCESS_KEY }}
+      TF_VAR_APP_AWS_SQS_QUEUE_URL      : ${{ secrets.TF_VAR_APP_AWS_SQS_QUEUE_URL }}
+      TF_VAR_APP_AWS_SNS_TOPIC_ARN      : ${{ secrets.TF_VAR_APP_AWS_SNS_TOPIC_ARN }}
+
+    steps:
+
+      - uses: actions/checkout@v2
+
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@v2
+
+      - name: Terraform Format
+        id: fmt
+        run: terraform fmt -check -recursive
+        continue-on-error: false
+
+      - name: Terraform Init
+        id: init
+        run: terraform init 
+
+      - name: Terraform Validate
+        id: validate
+        run: terraform validate -no-color
+
+      - name: Terraform Plan
+        id: plan
+        run: terraform plan -no-color
+        if: github.event_name == 'pull_request'
+        continue-on-error: true 
+
+      - uses: actions/github-script@v6
+        if: github.event_name == 'pull_request'
+        env: 
+          PLAN: "terraform\n${{ steps.plan.outputs.stdout }}"
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const output = `#### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
+            #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
+            #### Terraform Validation 🤖\`${{ steps.validate.outcome }}\`
+            <details><summary>Validation Output</summary>
+            \`\`\`\n
+            ${{ steps.validate.outputs.stdout }}
+            \`\`\`
+            </details>
+            #### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
+            <details><summary>Show Plan</summary>
+            \`\`\`\n
+            ${process.env.PLAN}
+            \`\`\`
+            </details>
+            *Pushed by: @${{ github.actor }}, Action: \`${{ github.event_name }}\`*`;
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            })
+      - name: Terraform Plan Status
+        if: steps.plan.outcome == 'failure'
+        run: exit 1
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve
