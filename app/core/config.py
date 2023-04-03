@@ -11,7 +11,7 @@ AWS_SECRET_ACCESS_KEY = os.environ.get("APP_AWS_SECRET_ACCESS_KEY")
 AWS_DEFAULT_REGION = os.environ.get("APP_AWS_DEFAULT_REGION")
 
 # AWS S3
-AWS_S3_BUCKET_NAME = os.environ.get("APP_AWS_S3_BUCKET_NAME", "image-resizer-bucket")
+AWS_S3_BUCKET_NAME = os.environ.get("APP_AWS_S3_BUCKET_NAME", "fastapi-removebg-bucket")
 
 # AWS SQS
 AWS_SQS_QUEUE_URL = os.environ.get("APP_AWS_SQS_QUEUE_NAME")
