@@ -1,4 +1,4 @@
-resource "aws_lambda_function" "removegb-api-lambda" {
+resource "aws_lambda_function" "removebg-api-lambda" {
 
   function_name = local.lambda_name
 

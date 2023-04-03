@@ -26,11 +26,18 @@ variable "APP_AWS_S3_BUCKET" {
 variable "APP_AWS_SQS_QUEUE_URL" {
   type        = string
   description = "The AWS SQS queue URL to use for deployment"
+  default     = ""
 }
 
 variable "APP_AWS_SNS_TOPIC_ARN" {
   type        = string
   description = "The AWS SNS topic ARN to use for deployment"
+  default     = ""
+}
+
+variable "APP_AWS_DYNAMODB_REMOVEBG_TABLE_NAME" {
+  type        = string
+  description = "The AWS DynamoDB table name to use for deployment"
 }
 
 
@@ -40,7 +47,7 @@ locals {
 
   lambda_name        = "removebg-${local.stage}"
   lambda_description = "Lambda function for removebg-${local.stage}"
-  lambda_s3_bucket   = "removebg-bucket"
+  lambda_s3_bucket   = "fastapi-removebg-bucket"
   lambda_s3_key      = "production/${var.APP_VERSION}.zip"
   lambda_handler     = "main.handler"
   lambda_runtime     = "python3.9"
