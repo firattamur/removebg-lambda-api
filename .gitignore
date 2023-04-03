@@ -247,3 +247,5 @@ terragrunt-debug.tfvars.json
 # End of https://www.toptal.com/developers/gitignore/api/macos,terragrunt,terraform,python
 .idea/
 .idea/*
+
+.config

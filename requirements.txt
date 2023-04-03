@@ -9,3 +9,4 @@ mangum
 pynamodb
 boto3
 aws-xray-sdk
+Pillow
