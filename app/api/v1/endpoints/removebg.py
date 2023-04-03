@@ -8,7 +8,7 @@ router = APIRouter()
 
 
 @router.post(
-    "/removebg",
+    "",
     tags=["removebg"],
     response_model=RemoveBGResponse,
     status_code=status.HTTP_201_CREATED,

@@ -1,14 +1,20 @@
 """RemoveBGEntity class to store the processed image data."""
 
 
-from pynamodb.attributes import NumberAttribute, UnicodeAttribute
+from pynamodb.attributes import UnicodeAttribute
 from pynamodb.models import Model
 
-from app.core.utils import Status
+from app.core.config import AWS_DEFAULT_REGION, AWS_DYNAMODB_REMOVEBG_TABLE_NAME
 
 
 class RemoveBGEntity(Model):
     """RemoveDBEntity class to store the processed image data."""
+
+    class Meta:
+        """Meta class for RemoveBGEntity."""
+
+        table_name = AWS_DYNAMODB_REMOVEBG_TABLE_NAME
+        region = AWS_DEFAULT_REGION
 
     id = UnicodeAttribute(hash_key=True)
     s3_key_original = UnicodeAttribute(null=False)
