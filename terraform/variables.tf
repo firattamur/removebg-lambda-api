@@ -48,7 +48,7 @@ locals {
   lambda_name        = "removebg-${local.stage}"
   lambda_description = "Lambda function for removebg-${local.stage}"
   lambda_s3_bucket   = "fastapi-removebg-bucket"
-  lambda_s3_key      = "production/${var.APP_VERSION}.zip"
+  lambda_s3_key      = "production/${var.APP_VERSION}/lambda.zip"
   lambda_handler     = "main.handler"
   lambda_runtime     = "python3.9"
   lambda_timeout     = 300
