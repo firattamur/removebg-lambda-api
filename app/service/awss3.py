@@ -1,5 +1,6 @@
 import uuid
 from io import BytesIO
+from mimetypes import guess_type
 from typing import Optional
 
 from fastapi import UploadFile
@@ -28,6 +29,7 @@ class AWSS3:
         :return: S3 key of image, or None if upload failed
         """
 
+        content_type, _ = guess_type(image.filename)
         s3_key = f"original/{str(uuid.uuid4())}.jpg"
 
         try:
@@ -36,7 +38,12 @@ class AWSS3:
                 output.write(image.file.read())
                 output.seek(0)
 
-                AWSClients.s3.upload_fileobj(output, self.bucket_name, s3_key)
+                AWSClients.s3.upload_fileobj(
+                    output,
+                    self.bucket_name,
+                    s3_key,
+                    ExtraArgs={"ContentType": content_type},
+                )
 
             return s3_key
 
