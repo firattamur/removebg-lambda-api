@@ -38,8 +38,8 @@ jobs:
 
       - name: Add project files
         run: |
-          cd $GITHUB_WORKSPACE/app
-          zip -g ${GITHUB_WORKSPACE}/lambda.zip -r .
+          cd $GITHUB_WORKSPACE/
+          zip -g ${GITHUB_WORKSPACE}/lambda.zip -r app
 
       - name: Upload zip to artifacts
         uses: actions/upload-artifact@v2
