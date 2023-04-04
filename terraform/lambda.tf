@@ -15,14 +15,15 @@ resource "aws_lambda_function" "removebg-api-lambda" {
 
   environment {
     variables = {
-      STAGE                     = local.stage
-      APP_VERSION               = var.APP_VERSION
-      APP_AWS_DEFAULT_REGION    = var.APP_AWS_DEFAULT_REGION
-      APP_AWS_ACCESS_KEY_ID     = var.APP_AWS_ACCESS_KEY_ID
-      APP_AWS_SECRET_ACCESS_KEY = var.APP_AWS_SECRET_ACCESS_KEY
-      APP_AWS_S3_BUCKET         = var.APP_AWS_S3_BUCKET
-      APP_AWS_SQS_QUEUE_URL     = var.APP_AWS_SQS_QUEUE_URL
-      APP_AWS_SNS_TOPIC_ARN     = var.APP_AWS_SNS_TOPIC_ARN
+      STAGE                                = local.stage
+      APP_VERSION                          = var.APP_VERSION
+      APP_AWS_DEFAULT_REGION               = var.APP_AWS_DEFAULT_REGION
+      APP_AWS_ACCESS_KEY_ID                = var.APP_AWS_ACCESS_KEY_ID
+      APP_AWS_SECRET_ACCESS_KEY            = var.APP_AWS_SECRET_ACCESS_KEY
+      APP_AWS_S3_BUCKET                    = var.APP_AWS_S3_BUCKET
+      APP_AWS_SQS_QUEUE_URL                = var.APP_AWS_SQS_QUEUE_URL
+      APP_AWS_SNS_TOPIC_ARN                = var.APP_AWS_SNS_TOPIC_ARN
+      APP_AWS_DYNAMODB_REMOVEBG_TABLE_NAME = var.APP_AWS_DYNAMODB_REMOVEBG_TABLE_NAME
     }
   }
 

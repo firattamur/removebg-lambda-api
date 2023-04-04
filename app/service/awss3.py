@@ -1,3 +1,4 @@
+import uuid
 from io import BytesIO
 from typing import Optional
 
@@ -18,7 +19,7 @@ class AWSS3:
         """
         self.bucket_name = AWS_S3_BUCKET_NAME
 
-    def upload_image(self, image: Image, s3_key: str) -> bool:
+    def upload_image(self, image: Image) -> Optional[str]:
         """
 
         Upload image to S3 bucket and return S3 key.
@@ -29,17 +30,20 @@ class AWSS3:
 
         """
 
+        s3_key = f"original/{str(uuid.uuid4())}.jpg"
+
         with BytesIO() as output:
             try:
                 image.save(output, format="JPEG")
                 output.seek(0)
                 AWSClients.s3.upload_fileobj(output, self.bucket_name, s3_key)
 
-                return True
+                return s3_key
 
             except Exception as e:
                 print(f"Error uploading image to S3: {e}")
-                return False
+
+                return None
 
     def download_image(self, s3_key: str) -> Optional[Image.Image]:
         """
@@ -53,8 +57,10 @@ class AWSS3:
                 AWSClients.s3.download_fileobj(self.bucket_name, s3_key, output)
                 output.seek(0)
                 image = Image.open(output)
+
                 return image
 
             except Exception as e:
                 print(f"Error downloading image from S3: {e}")
+
                 return None

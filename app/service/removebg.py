@@ -50,13 +50,13 @@ class RemoveBGService:
             request_id=entity.id, s3_key_processed=None, status=entity.status
         )
 
-    def send_message_to_sqs(self, s3_key: str, request_id: str) -> dict:
+    def send_message_to_sqs(self, s3_key_original: str, request_id: str) -> dict:
         """Send message to SQS queue.
 
-        :param s3_key: S3 key of image.
+        :param s3_key_original: S3 key of image.
         :return: None
         """
-        message = {"s3_key_original": s3_key, "request_id": request_id}
+        message = {"s3_key_original": s3_key_original, "request_id": request_id}
         message_json = json.dumps(message)
         response = AWSClients.sqs.send_message(
             QueueUrl=AWSClients.sqs_queue_url, MessageBody=message_json
@@ -84,7 +84,7 @@ class RemoveBGService:
         """
 
         entity = RemoveBGEntity(
-            id=uuid.uuid4(),
+            id=str(uuid.uuid4()),
             s3_key_original=s3_key_original,
             s3_key_processed=None,
             status=Status.PROCESSING.value,
