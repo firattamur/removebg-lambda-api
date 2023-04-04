@@ -1,9 +1,10 @@
 import os
 
-import dotenv
+from dotenv import load_dotenv
 
-# Load environment variables from .env file in root directory
-dotenv.load_dotenv()
+# Load .env file
+dotenv_path = ".env.local"
+load_dotenv(dotenv_path=dotenv_path)
 
 # AWS Credetials
 AWS_ACCESS_KEY_ID = os.environ.get("APP_AWS_ACCESS_KEY_ID")

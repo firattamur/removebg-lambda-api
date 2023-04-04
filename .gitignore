@@ -1,5 +1,4 @@
-# Created by https://www.toptal.com/developers/gitignore/api/macos,terragrunt,terraform,python
-# Edit at https://www.toptal.com/developers/gitignore?templates=macos,terragrunt,terraform,python
+
 
 ### macOS ###
 # General
@@ -249,3 +248,5 @@ terragrunt-debug.tfvars.json
 .idea/*
 
 .config
+.env.*
+.env*

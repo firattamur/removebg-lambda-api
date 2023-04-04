@@ -59,7 +59,9 @@ class RemoveBGService:
         message = {"s3_key_original": s3_key_original, "request_id": request_id}
         message_json = json.dumps(message)
         response = AWSClients.sqs.send_message(
-            QueueUrl=AWSClients.sqs_queue_url, MessageBody=message_json
+            QueueUrl=AWSClients.sqs_queue_url,
+            MessageBody=message_json,
+            MessageGroupId=request_id,
         )
 
         return response
